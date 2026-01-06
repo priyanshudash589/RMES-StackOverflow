@@ -1,0 +1,394 @@
+<%- include('partials/header', { pageTitle: question.title }) %>
+
+<!-- Main Content Layout -->
+<div class="flex flex-1 justify-center py-8 px-4 sm:px-6 lg:px-8">
+    <div class="flex w-full max-w-[1280px] gap-8">
+        
+        <!-- Left Column: Question & Answers -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <!-- Breadcrumbs & Header -->
+            <div class="mb-6">
+                <div class="flex flex-wrap gap-2 text-sm mb-4">
+                    <a class="text-primary hover:underline" href="/questions">Home</a>
+                    <span class="text-slate-400 dark:text-[#9ca8ba]">/</span>
+                    <% if (question.departmentName) { %>
+                    <a class="text-slate-500 dark:text-[#9ca8ba] hover:text-primary dark:hover:text-primary transition-colors" href="/questions?departmentId=<%= question.departmentId %>"><%= question.departmentName %></a>
+                    <span class="text-slate-400 dark:text-[#9ca8ba]">/</span>
+                    <% } %>
+                    <span class="text-slate-900 dark:text-white font-medium">Question</span>
+                </div>
+                <div class="flex justify-between items-start gap-4">
+                    <h1 class="text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900 dark:text-white">
+                        <%= question.title %>
+                    </h1>
+                    <a href="/questions/ask" class="shrink-0 flex items-center justify-center rounded-lg border border-primary text-primary hover:bg-primary/10 px-4 py-2 text-sm font-bold transition-colors">
+                        Ask Question
+                    </a>
+                </div>
+                <div class="flex flex-wrap gap-4 mt-3 text-sm text-slate-500 dark:text-[#9ca8ba] border-b border-slate-200 dark:border-[#282f39] pb-6">
+                    <span class="flex items-center gap-1" title="<%= question.createdAt %>">
+                        <span class="text-slate-400">Asked</span>
+                        <span class="text-slate-900 dark:text-white font-medium"><%= formatTimeAgo(question.createdAt) %></span>
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <span class="text-slate-400">Active</span>
+                        <span class="text-slate-900 dark:text-white font-medium"><%= formatTimeAgo(question.updatedAt) %></span>
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <span class="text-slate-400">Viewed</span>
+                        <span class="text-slate-900 dark:text-white font-medium"><%= question.viewCount %> times</span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Question Body Layout -->
+            <div class="flex gap-4 md:gap-6">
+                <!-- Voting Sidebar -->
+                <div class="flex flex-col items-center gap-2 pt-2 w-12 shrink-0">
+                    <button onclick="vote('question', '<%= question.id %>', 'upvote')" aria-label="Upvote" class="group p-1 rounded-full hover:bg-slate-100 dark:hover:bg-[#282f39] transition-colors">
+                        <span class="material-symbols-outlined text-4xl text-slate-400 dark:text-[#6a788b] group-hover:text-primary transition-colors">arrow_drop_up</span>
+                    </button>
+                    <span id="question-score-<%= question.id %>" class="text-xl font-bold text-slate-700 dark:text-slate-200"><%= question.voteScore %></span>
+                    <button onclick="vote('question', '<%= question.id %>', 'downvote')" aria-label="Downvote" class="group p-1 rounded-full hover:bg-slate-100 dark:hover:bg-[#282f39] transition-colors">
+                        <span class="material-symbols-outlined text-4xl text-slate-400 dark:text-[#6a788b] group-hover:text-red-500 transition-colors">arrow_drop_down</span>
+                    </button>
+                    <button aria-label="Bookmark" class="mt-4 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-[#282f39] transition-colors">
+                        <span class="material-symbols-outlined text-xl text-slate-400 dark:text-[#6a788b] hover:text-yellow-500">bookmark_border</span>
+                    </button>
+                </div>
+                
+                <!-- Post Content -->
+                <div class="flex-1 min-w-0">
+                    <div class="prose prose-slate dark:prose-invert max-w-none text-base leading-7">
+                        <%- question.body.replace(/\n/g, '<br>') %>
+                    </div>
+                    
+                    <!-- Tags -->
+                    <div class="flex flex-wrap gap-2 mt-6 mb-8">
+                        <% if (question.tags && question.tags.length > 0) { %>
+                            <% question.tags.forEach(function(tag) { %>
+                            <a class="flex h-6 items-center justify-center gap-x-2 rounded bg-primary/10 hover:bg-primary/20 transition-colors px-2.5" href="/questions?tagId=<%= tag.id %>">
+                                <p class="text-primary text-xs font-medium leading-normal"><%= tag.name %></p>
+                            </a>
+                            <% }); %>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Action Bar & User Card -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
+                        <div class="flex gap-4 pt-1">
+                            <button class="text-sm font-medium text-slate-500 dark:text-[#9ca8ba] hover:text-slate-700 dark:hover:text-slate-300 transition-colors">Share</button>
+                            <button class="text-sm font-medium text-slate-500 dark:text-[#9ca8ba] hover:text-slate-700 dark:hover:text-slate-300 transition-colors">Edit</button>
+                            <button class="text-sm font-medium text-slate-500 dark:text-[#9ca8ba] hover:text-slate-700 dark:hover:text-slate-300 transition-colors">Follow</button>
+                        </div>
+                        <div class="bg-primary/5 dark:bg-[#1c232b] rounded-lg p-3 w-full sm:w-64 border border-primary/10 dark:border-primary/5">
+                            <p class="text-xs text-slate-500 dark:text-[#9ca8ba] mb-2">asked <%= formatTimeAgo(question.createdAt) %></p>
+                            <div class="flex gap-3">
+                                <div class="bg-gradient-to-br from-primary to-purple-600 rounded-md size-10 shrink-0 flex items-center justify-center text-white font-bold">
+                                    <%= question.authorName ? question.authorName.charAt(0).toUpperCase() : 'A' %>
+                                </div>
+                                <div class="flex flex-col text-sm">
+                                    <span class="text-primary font-semibold"><%= question.authorName || 'Anonymous' %></span>
+                                    <div class="flex items-center gap-1 text-slate-500 dark:text-[#9ca8ba] text-xs">
+                                        <span class="font-bold text-slate-700 dark:text-slate-300"><%= question.authorReputation || 0 %></span> reputation
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Comments Section -->
+                    <% if (question.comments && question.comments.length > 0) { %>
+                    <div class="border-t border-slate-200 dark:border-[#282f39] pt-4">
+                        <ul class="flex flex-col gap-3">
+                            <% question.comments.forEach(function(comment) { %>
+                            <li class="text-sm border-b border-slate-100 dark:border-[#282f39]/50 pb-2 last:border-0">
+                                <span class="text-slate-700 dark:text-slate-300"><%= comment.body %></span>
+                                <span class="mx-1 text-primary cursor-pointer hover:underline">– <%= comment.authorName || 'Anonymous' %></span>
+                                <span class="text-slate-400 dark:text-[#6a788b] text-xs"><%= formatTimeAgo(comment.createdAt) %></span>
+                            </li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                    <% } %>
+                    <div class="pt-2">
+                        <button onclick="toggleCommentForm('question', '<%= question.id %>')" class="text-sm text-slate-500 dark:text-[#9ca8ba] hover:text-primary transition-colors opacity-70 hover:opacity-100">Add a comment</button>
+                        <form id="comment-form-question-<%= question.id %>" class="hidden mt-3" onsubmit="submitComment(event, 'question', '<%= question.id %>')">
+                            <textarea name="body" rows="2" class="w-full rounded-lg border border-slate-300 dark:border-[#282f39] bg-white dark:bg-[#111418] text-slate-900 dark:text-white p-2 text-sm" placeholder="Add a comment..."></textarea>
+                            <button type="submit" class="mt-2 px-3 py-1 bg-primary text-white text-sm rounded">Add Comment</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Answers Header -->
+            <div class="mt-12 mb-6 flex items-center justify-between">
+                <h2 class="text-xl text-slate-900 dark:text-white font-medium"><%= question.answerCount %> Answer<%= question.answerCount !== 1 ? 's' : '' %></h2>
+                <div class="relative">
+                    <div class="flex items-center gap-2 border border-slate-300 dark:border-[#282f39] rounded px-3 py-1.5 bg-white dark:bg-[#161b22] text-sm cursor-pointer hover:border-slate-400 dark:hover:border-slate-500 transition-colors">
+                        <span class="text-slate-700 dark:text-slate-300">Sorted by: <span class="font-medium text-slate-900 dark:text-white">Highest Score</span></span>
+                        <span class="material-symbols-outlined text-lg">expand_more</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Answers List -->
+            <% if (question.answers && question.answers.length > 0) { %>
+                <% question.answers.forEach(function(answer, index) { %>
+                <div class="flex gap-4 md:gap-6 mb-8 relative <%= answer.isAccepted ? 'pt-4 pb-4' : (index > 0 ? 'border-t border-slate-200 dark:border-[#282f39] pt-8' : '') %>">
+                    <% if (answer.isAccepted) { %>
+                    <!-- Accepted answer glow effect -->
+                    <div class="absolute -inset-4 bg-primary/5 rounded-xl -z-10 border border-primary/20 hidden md:block"></div>
+                    <% } %>
+                    
+                    <!-- Voting Sidebar -->
+                    <div class="flex flex-col items-center gap-2 pt-2 w-12 shrink-0">
+                        <button onclick="vote('answer', '<%= answer.id %>', 'upvote')" class="group p-1 rounded-full hover:bg-slate-100 dark:hover:bg-[#282f39] transition-colors">
+                            <span class="material-symbols-outlined text-4xl text-slate-400 dark:text-[#6a788b] group-hover:text-primary transition-colors">arrow_drop_up</span>
+                        </button>
+                        <span id="answer-score-<%= answer.id %>" class="text-xl font-bold text-slate-700 dark:text-slate-200"><%= answer.voteScore %></span>
+                        <button onclick="vote('answer', '<%= answer.id %>', 'downvote')" class="group p-1 rounded-full hover:bg-slate-100 dark:hover:bg-[#282f39] transition-colors">
+                            <span class="material-symbols-outlined text-4xl text-slate-400 dark:text-[#6a788b] group-hover:text-red-500 transition-colors">arrow_drop_down</span>
+                        </button>
+                        <% if (answer.isAccepted) { %>
+                        <div class="mt-2 text-green-500 dark:text-green-400 flex flex-col items-center gap-1" title="Accepted Answer">
+                            <span class="material-symbols-outlined text-3xl font-bold">check_circle</span>
+                        </div>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Answer Content -->
+                    <div class="flex-1 min-w-0">
+                        <div class="prose prose-slate dark:prose-invert max-w-none text-base leading-7">
+                            <%- answer.body.replace(/\n/g, '<br>') %>
+                        </div>
+                        
+                        <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mt-8">
+                            <div class="flex gap-4 pt-1">
+                                <button class="text-sm font-medium text-slate-500 dark:text-[#9ca8ba] hover:text-slate-700 dark:hover:text-slate-300 transition-colors">Share</button>
+                                <button class="text-sm font-medium text-slate-500 dark:text-[#9ca8ba] hover:text-slate-700 dark:hover:text-slate-300 transition-colors">Edit</button>
+                                <% if (!question.acceptedAnswerId) { %>
+                                <button onclick="acceptAnswer('<%= answer.id %>')" class="text-sm font-medium text-green-600 hover:text-green-700 transition-colors">Accept</button>
+                                <% } %>
+                            </div>
+                            <div class="flex gap-4 items-center">
+                                <span class="text-xs text-slate-400 dark:text-[#6a788b]">answered <%= formatTimeAgo(answer.createdAt) %></span>
+                                <div class="flex items-center gap-3">
+                                    <div class="bg-gradient-to-br from-primary to-purple-600 rounded-md size-8 shrink-0 flex items-center justify-center text-white text-sm font-bold">
+                                        <%= answer.authorName ? answer.authorName.charAt(0).toUpperCase() : 'A' %>
+                                    </div>
+                                    <div class="flex flex-col text-sm">
+                                        <span class="text-primary font-semibold"><%= answer.authorName || 'Anonymous' %></span>
+                                        <div class="flex items-center gap-1 text-slate-500 dark:text-[#9ca8ba] text-xs">
+                                            <span class="font-bold text-slate-700 dark:text-slate-300"><%= answer.authorReputation || 0 %></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Answer Comments -->
+                        <% if (answer.comments && answer.comments.length > 0) { %>
+                        <div class="border-t border-slate-200 dark:border-[#282f39] pt-4 mt-4">
+                            <ul class="flex flex-col gap-3">
+                                <% answer.comments.forEach(function(comment) { %>
+                                <li class="text-sm border-b border-slate-100 dark:border-[#282f39]/50 pb-2 last:border-0">
+                                    <span class="text-slate-700 dark:text-slate-300"><%= comment.body %></span>
+                                    <span class="mx-1 text-primary cursor-pointer hover:underline">– <%= comment.authorName || 'Anonymous' %></span>
+                                    <span class="text-slate-400 dark:text-[#6a788b] text-xs"><%= formatTimeAgo(comment.createdAt) %></span>
+                                </li>
+                                <% }); %>
+                            </ul>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+                <% }); %>
+            <% } else { %>
+            <div class="text-center py-12 text-slate-500 dark:text-[#9ca8ba]">
+                <span class="material-symbols-outlined text-4xl mb-2">forum</span>
+                <p>No answers yet. Be the first to help!</p>
+            </div>
+            <% } %>
+            
+            <!-- Your Answer Editor -->
+            <div class="border-t border-slate-200 dark:border-[#282f39] pt-8 mt-8">
+                <h2 class="text-xl text-slate-900 dark:text-white font-medium mb-4">Your Answer</h2>
+                <form id="answerForm" onsubmit="submitAnswer(event)">
+                    <div class="border border-slate-300 dark:border-[#282f39] rounded-lg overflow-hidden bg-white dark:bg-[#0d1117] focus-within:ring-2 ring-primary/50 transition-shadow">
+                        <!-- Toolbar -->
+                        <div class="flex items-center gap-1 p-2 bg-slate-50 dark:bg-[#161b22] border-b border-slate-300 dark:border-[#282f39]">
+                            <button type="button" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-[#282f39] text-slate-600 dark:text-slate-400" title="Bold"><span class="material-symbols-outlined text-[20px]">format_bold</span></button>
+                            <button type="button" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-[#282f39] text-slate-600 dark:text-slate-400" title="Italic"><span class="material-symbols-outlined text-[20px]">format_italic</span></button>
+                            <div class="w-px h-5 bg-slate-300 dark:bg-slate-600 mx-1"></div>
+                            <button type="button" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-[#282f39] text-slate-600 dark:text-slate-400" title="Code"><span class="material-symbols-outlined text-[20px]">code</span></button>
+                            <button type="button" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-[#282f39] text-slate-600 dark:text-slate-400" title="List"><span class="material-symbols-outlined text-[20px]">format_list_bulleted</span></button>
+                        </div>
+                        <textarea id="answerBody" name="body" required class="w-full bg-transparent p-4 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none resize-y font-mono text-sm border-none" placeholder="Type your answer here using Markdown..." rows="8"></textarea>
+                    </div>
+                    <div class="mt-6 flex justify-between items-center">
+                        <button type="submit" class="rounded-lg bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary/20 hover:bg-blue-600 hover:shadow-primary/40 transition-all">
+                            Post Your Answer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+        
+        <!-- Right Column: Sidebar -->
+        <aside class="hidden lg:flex flex-col w-80 shrink-0 gap-6">
+            <!-- Stats Widget -->
+            <div class="rounded-lg border border-slate-200 dark:border-[#282f39] bg-white dark:bg-[#161b22] p-4 shadow-sm">
+                <h3 class="text-sm font-bold text-slate-500 dark:text-[#9ca8ba] uppercase tracking-wider mb-3">Stats</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-2xl font-light text-slate-900 dark:text-white"><%= question.viewCount %></p>
+                        <p class="text-xs text-slate-500 dark:text-[#6a788b]">views</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-light text-slate-900 dark:text-white"><%= question.answerCount %></p>
+                        <p class="text-xs text-slate-500 dark:text-[#6a788b]">answers</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-light text-slate-900 dark:text-white"><%= question.voteScore %></p>
+                        <p class="text-xs text-slate-500 dark:text-[#6a788b]">score</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Related Questions -->
+            <% if (typeof relatedQuestions !== 'undefined' && relatedQuestions.length > 0) { %>
+            <div class="flex flex-col gap-4">
+                <h3 class="text-sm font-bold text-slate-500 dark:text-[#9ca8ba] uppercase tracking-wider">Related Questions</h3>
+                <% relatedQuestions.forEach(function(q) { %>
+                <a class="group flex flex-col gap-1" href="/questions/<%= q.id %>">
+                    <span class="text-sm text-primary group-hover:underline line-clamp-2"><%= q.title %></span>
+                    <span class="text-xs text-slate-500 dark:text-[#6a788b] flex items-center gap-2">
+                        <span class="<%= q.answerCount > 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-slate-100 dark:bg-[#282f39] text-slate-600 dark:text-slate-400' %> px-1.5 rounded text-[10px]"><%= q.answerCount %> answers</span>
+                    </span>
+                </a>
+                <% }); %>
+            </div>
+            <% } %>
+        </aside>
+    </div>
+</div>
+
+<script>
+// Vote on question or answer
+async function vote(type, id, voteType) {
+    try {
+        const endpoint = type === 'question' ? `/api/questions/${id}/vote` : `/api/answers/${id}/vote`;
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-User-Id': 'demo-user-id',
+                'X-User-Email': 'demo@example.com',
+                'X-User-Name': 'Demo User'
+            },
+            body: JSON.stringify({ voteType })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById(`${type}-score-${id}`).textContent = data.newScore;
+        } else {
+            const error = await response.json();
+            alert(error.message || 'Failed to vote');
+        }
+    } catch (err) {
+        alert('Error voting');
+    }
+}
+
+// Accept answer
+async function acceptAnswer(answerId) {
+    try {
+        const response = await fetch(`/api/answers/${answerId}/accept`, {
+            method: 'POST',
+            headers: {
+                'X-User-Id': 'demo-user-id',
+                'X-User-Email': 'demo@example.com',
+                'X-User-Name': 'Demo User'
+            }
+        });
+        
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            const error = await response.json();
+            alert(error.message || 'Failed to accept answer');
+        }
+    } catch (err) {
+        alert('Error accepting answer');
+    }
+}
+
+// Submit answer
+async function submitAnswer(event) {
+    event.preventDefault();
+    const body = document.getElementById('answerBody').value;
+    
+    try {
+        const response = await fetch('/api/questions/<%= question.id %>/answers', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-User-Id': 'demo-user-id',
+                'X-User-Email': 'demo@example.com',
+                'X-User-Name': 'Demo User'
+            },
+            body: JSON.stringify({ body })
+        });
+        
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            const error = await response.json();
+            alert(error.message || 'Failed to post answer');
+        }
+    } catch (err) {
+        alert('Error posting answer');
+    }
+}
+
+// Toggle comment form
+function toggleCommentForm(type, id) {
+    const form = document.getElementById(`comment-form-${type}-${id}`);
+    form.classList.toggle('hidden');
+}
+
+// Submit comment
+async function submitComment(event, type, id) {
+    event.preventDefault();
+    const form = event.target;
+    const body = form.querySelector('textarea').value;
+    
+    const endpoint = type === 'question' ? `/api/questions/${id}/comments` : `/api/answers/${id}/comments`;
+    
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-User-Id': 'demo-user-id',
+                'X-User-Email': 'demo@example.com',
+                'X-User-Name': 'Demo User'
+            },
+            body: JSON.stringify({ body })
+        });
+        
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            const error = await response.json();
+            alert(error.message || 'Failed to post comment');
+        }
+    } catch (err) {
+        alert('Error posting comment');
+    }
+}
+</script>
+
+<%- include('partials/footer') %>

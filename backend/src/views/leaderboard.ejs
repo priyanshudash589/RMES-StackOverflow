@@ -1,0 +1,218 @@
+<%- include('partials/header', { pageTitle: 'Leaderboard' }) %>
+
+<style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
+<div class="flex flex-1">
+    <!-- Sidebar -->
+    <aside class="w-64 flex-shrink-0 flex flex-col justify-between bg-white dark:bg-[#111418] border-r border-slate-200 dark:border-slate-800 hidden lg:flex z-10">
+        <div class="flex flex-col gap-4 p-4">
+            <div class="flex items-center gap-3 px-2 py-2 mb-4">
+                <div class="bg-primary rounded-full size-10 flex items-center justify-center text-white font-bold">DE</div>
+                <h1 class="text-slate-900 dark:text-white text-lg font-bold leading-normal">DevEngine</h1>
+            </div>
+            <nav class="flex flex-col gap-2">
+                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" href="/questions">
+                    <span class="material-symbols-outlined text-2xl group-hover:text-primary transition-colors">help</span>
+                    <p class="text-sm font-medium leading-normal">Questions</p>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" href="/tags">
+                    <span class="material-symbols-outlined text-2xl group-hover:text-primary transition-colors">label</span>
+                    <p class="text-sm font-medium leading-normal">Tags</p>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary dark:text-primary font-semibold" href="/leaderboard">
+                    <span class="material-symbols-outlined text-2xl fill-1">emoji_events</span>
+                    <p class="text-sm leading-normal">Leaderboard</p>
+                </a>
+            </nav>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative w-full">
+        <!-- Scrollable Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 lg:px-12 scroll-smooth" tabindex="0">
+            <div class="max-w-6xl mx-auto space-y-8 pb-10">
+                <!-- Page Heading & Time Filters -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                    <div class="flex flex-col gap-2">
+                        <h1 class="text-slate-900 dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-tight">Top Contributors</h1>
+                        <p class="text-slate-500 dark:text-slate-400 text-base font-normal">Recognizing our top engineering talent.</p>
+                    </div>
+                    <!-- Time Chips -->
+                    <div class="flex bg-slate-200 dark:bg-[#161e2c] p-1 rounded-lg self-start md:self-end">
+                        <a href="?period=week" class="px-4 py-1.5 rounded-md text-sm font-medium <%= period === 'week' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' %> transition-colors">This Week</a>
+                        <a href="?period=month" class="px-4 py-1.5 rounded-md text-sm font-medium <%= !period || period === 'month' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' %> transition-colors">This Month</a>
+                        <a href="?period=all" class="px-4 py-1.5 rounded-md text-sm font-medium <%= period === 'all' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' %> transition-colors">All Time</a>
+                    </div>
+                </div>
+                
+                <!-- Controls: Search & Segmented Toggle -->
+                <div class="flex flex-col lg:flex-row gap-4 justify-between items-center bg-white dark:bg-[#161e2c] p-2 rounded-xl border border-slate-200 dark:border-slate-800/60 shadow-sm">
+                    <!-- Search -->
+                    <form action="/leaderboard" method="GET" class="w-full lg:w-96 relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+                        </div>
+                        <input name="search" value="<%= typeof search !== 'undefined' ? search : '' %>" class="block w-full pl-10 pr-3 py-2.5 border-none rounded-lg bg-slate-100 dark:bg-[#111418] text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 sm:text-sm" placeholder="Search users..." type="text"/>
+                    </form>
+                    <!-- View Toggle -->
+                    <div class="flex p-1 bg-slate-100 dark:bg-[#111418] rounded-lg w-full lg:w-auto">
+                        <a href="?view=org<%= period ? '&period=' + period : '' %>" class="flex-1 lg:flex-none px-6 py-2 rounded-md transition-all <%= !view || view === 'org' ? 'bg-white dark:bg-[#161e2c] text-primary shadow-sm' : 'text-slate-500 dark:text-slate-400' %> text-sm font-medium text-center">
+                            Organization-Wide
+                        </a>
+                        <a href="?view=dept<%= period ? '&period=' + period : '' %>" class="flex-1 lg:flex-none px-6 py-2 rounded-md transition-all <%= view === 'dept' ? 'bg-white dark:bg-[#161e2c] text-primary shadow-sm' : 'text-slate-500 dark:text-slate-400' %> text-sm font-medium text-center">
+                            Department-Wise
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Podium Section (Top 3) -->
+                <% if (leaderboard && leaderboard.length >= 3) { %>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end py-6">
+                    <!-- Rank 2 -->
+                    <div class="order-2 md:order-1 flex flex-col items-center">
+                        <div class="relative group cursor-pointer w-full">
+                            <div class="absolute -inset-0.5 bg-gradient-to-t from-slate-400 to-slate-600 rounded-2xl opacity-20 group-hover:opacity-40 transition duration-500 blur"></div>
+                            <div class="relative flex flex-col items-center bg-white dark:bg-[#161e2c] p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl">
+                                <div class="relative mb-3">
+                                    <div class="size-20 rounded-full p-1 bg-gradient-to-tr from-slate-300 to-slate-500">
+                                        <div class="size-full rounded-full bg-[#161e2c] p-0.5 flex items-center justify-center text-white text-2xl font-bold">
+                                            <%= leaderboard[1].user.displayName.charAt(0).toUpperCase() %>
+                                        </div>
+                                    </div>
+                                    <div class="absolute -bottom-2 inset-x-0 flex justify-center">
+                                        <div class="bg-slate-300 text-slate-900 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm border border-white">#2</div>
+                                    </div>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mt-2"><%= leaderboard[1].user.displayName %></h3>
+                                <p class="text-xs text-slate-500 mb-3"><%= leaderboard[1].answersCount %> answers</p>
+                                <div class="flex items-center gap-1 text-primary font-bold text-lg">
+                                    <span class="material-symbols-outlined text-base">trending_up</span>
+                                    <%= formatReputation(leaderboard[1].reputation) %>
+                                </div>
+                                <p class="text-xs text-slate-500">Reputation</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rank 1 -->
+                    <div class="order-1 md:order-2 flex flex-col items-center z-10">
+                        <div class="relative group cursor-pointer w-full transform md:-translate-y-4">
+                            <div class="absolute -inset-1 bg-gradient-to-t from-yellow-400 to-yellow-600 rounded-2xl opacity-30 group-hover:opacity-50 transition duration-500 blur-md"></div>
+                            <div class="relative flex flex-col items-center bg-white dark:bg-[#161e2c] p-8 rounded-2xl border border-yellow-500/30 shadow-2xl">
+                                <div class="absolute top-0 right-8 transform -translate-y-1/2">
+                                    <span class="material-symbols-outlined text-4xl text-yellow-400 drop-shadow-lg filter">emoji_events</span>
+                                </div>
+                                <div class="relative mb-4">
+                                    <div class="size-28 rounded-full p-1.5 bg-gradient-to-tr from-yellow-300 via-yellow-500 to-yellow-600 shadow-lg shadow-yellow-500/20">
+                                        <div class="size-full rounded-full bg-[#161e2c] p-0.5 flex items-center justify-center text-white text-3xl font-bold">
+                                            <%= leaderboard[0].user.displayName.charAt(0).toUpperCase() %>
+                                        </div>
+                                    </div>
+                                    <div class="absolute -bottom-3 inset-x-0 flex justify-center">
+                                        <div class="bg-yellow-400 text-yellow-900 text-sm font-black px-3 py-0.5 rounded-full shadow-md border-2 border-[#161e2c]">#1</div>
+                                    </div>
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mt-3"><%= leaderboard[0].user.displayName %></h3>
+                                <p class="text-sm text-slate-500 mb-4"><%= leaderboard[0].answersCount %> answers</p>
+                                <div class="flex flex-col items-center gap-1 w-full border-t border-slate-200 dark:border-slate-700 pt-4">
+                                    <div class="flex items-center gap-2 text-yellow-500 font-black text-2xl">
+                                        <%= formatReputation(leaderboard[0].reputation) %>
+                                    </div>
+                                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Top Contributor</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rank 3 -->
+                    <div class="order-3 md:order-3 flex flex-col items-center">
+                        <div class="relative group cursor-pointer w-full">
+                            <div class="absolute -inset-0.5 bg-gradient-to-t from-orange-700 to-amber-700 rounded-2xl opacity-20 group-hover:opacity-40 transition duration-500 blur"></div>
+                            <div class="relative flex flex-col items-center bg-white dark:bg-[#161e2c] p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl">
+                                <div class="relative mb-3">
+                                    <div class="size-20 rounded-full p-1 bg-gradient-to-tr from-orange-400 to-amber-700">
+                                        <div class="size-full rounded-full bg-[#161e2c] p-0.5 flex items-center justify-center text-white text-2xl font-bold">
+                                            <%= leaderboard[2].user.displayName.charAt(0).toUpperCase() %>
+                                        </div>
+                                    </div>
+                                    <div class="absolute -bottom-2 inset-x-0 flex justify-center">
+                                        <div class="bg-amber-700 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm border border-[#161e2c]">#3</div>
+                                    </div>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mt-2"><%= leaderboard[2].user.displayName %></h3>
+                                <p class="text-xs text-slate-500 mb-3"><%= leaderboard[2].answersCount %> answers</p>
+                                <div class="flex items-center gap-1 text-primary font-bold text-lg">
+                                    <span class="material-symbols-outlined text-base">trending_flat</span>
+                                    <%= formatReputation(leaderboard[2].reputation) %>
+                                </div>
+                                <p class="text-xs text-slate-500">Reputation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+                
+                <!-- Leaderboard Table -->
+                <div class="bg-white dark:bg-[#161e2c] rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+                    <!-- Table Header -->
+                    <div class="grid grid-cols-12 gap-4 px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#111418] text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        <div class="col-span-1">Rank</div>
+                        <div class="col-span-5 md:col-span-4">Contributor</div>
+                        <div class="col-span-3 hidden md:block">Department</div>
+                        <div class="col-span-3 md:col-span-2 text-right">Reputation</div>
+                        <div class="col-span-3 md:col-span-2 text-right hidden sm:block">Answers</div>
+                    </div>
+                    
+                    <!-- Table Rows -->
+                    <div class="divide-y divide-slate-200 dark:divide-slate-800">
+                        <% if (leaderboard && leaderboard.length > 0) { %>
+                            <% leaderboard.forEach(function(entry, index) { %>
+                            <div class="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+                                <div class="col-span-1 text-slate-500 font-medium"><%= entry.rank %></div>
+                                <div class="col-span-5 md:col-span-4 flex items-center gap-3">
+                                    <div class="size-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold">
+                                        <%= entry.user.displayName.charAt(0).toUpperCase() %>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors"><%= entry.user.displayName %></p>
+                                        <p class="text-xs text-slate-500 truncate"><%= entry.user.email %></p>
+                                    </div>
+                                </div>
+                                <div class="col-span-3 hidden md:flex items-center">
+                                    <% if (entry.user.departmentName) { %>
+                                    <span class="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-medium border border-slate-200 dark:border-slate-700"><%= entry.user.departmentName %></span>
+                                    <% } %>
+                                </div>
+                                <div class="col-span-3 md:col-span-2 text-right">
+                                    <span class="text-sm font-bold text-slate-900 dark:text-white"><%= formatReputation(entry.reputation) %></span>
+                                </div>
+                                <div class="col-span-3 md:col-span-2 text-right hidden sm:block">
+                                    <span class="text-sm text-slate-500"><%= entry.answersCount %></span>
+                                </div>
+                            </div>
+                            <% }); %>
+                        <% } else { %>
+                        <div class="px-6 py-12 text-center text-slate-500">
+                            <span class="material-symbols-outlined text-4xl mb-2">emoji_events</span>
+                            <p>No contributors yet. Be the first!</p>
+                        </div>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Table Footer / Pagination -->
+                    <% if (leaderboard && leaderboard.length > 0) { %>
+                    <div class="px-6 py-4 bg-slate-50 dark:bg-[#111418] border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <span class="text-xs text-slate-500">Showing <%= leaderboard.length %> contributors</span>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<%- include('partials/footer') %>

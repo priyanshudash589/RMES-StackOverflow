@@ -1,0 +1,53 @@
+<!-- Right Sidebar: Context -->
+<aside class="hidden xl:block xl:col-span-3 flex flex-col gap-6">
+    <!-- Trending Card -->
+    <% if (typeof trendingQuestions !== 'undefined' && trendingQuestions.length > 0) { %>
+    <div class="bg-white dark:bg-[#151a21] rounded-lg border border-gray-200 dark:border-[#282f39] p-5 shadow-sm">
+        <h3 class="text-slate-900 dark:text-white font-bold text-sm mb-4">Trending Questions</h3>
+        <div class="flex flex-col gap-4">
+            <% trendingQuestions.forEach(function(q) { %>
+            <a href="/questions/<%= q.id %>" class="flex gap-3 items-start group cursor-pointer">
+                <span class="mt-1 flex h-5 min-w-5 items-center justify-center rounded bg-primary/10 text-[11px] font-bold text-primary"><%= q.voteScore %></span>
+                <p class="text-xs text-slate-700 dark:text-gray-300 leading-normal group-hover:text-primary transition-colors line-clamp-2"><%= q.title %></p>
+            </a>
+            <% }); %>
+        </div>
+    </div>
+    <% } %>
+    
+    <!-- Top Contributors -->
+    <% if (typeof topContributors !== 'undefined' && topContributors.length > 0) { %>
+    <div class="bg-white dark:bg-[#151a21] rounded-lg border border-gray-200 dark:border-[#282f39] p-5 shadow-sm">
+        <h3 class="text-slate-900 dark:text-white font-bold text-sm mb-4">Top Contributors</h3>
+        <div class="flex flex-col gap-4">
+            <% topContributors.forEach(function(entry) { %>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="size-8 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                        <%= entry.user.displayName.charAt(0).toUpperCase() %>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-slate-900 dark:text-white"><%= entry.user.displayName %></span>
+                        <span class="text-[10px] text-gray-500"><%= entry.answersCount %> answers</span>
+                    </div>
+                </div>
+                <span class="text-xs font-mono font-medium text-primary"><%= entry.reputation >= 1000 ? (entry.reputation / 1000).toFixed(1) + 'k' : entry.reputation %></span>
+            </div>
+            <% }); %>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-[#282f39]">
+            <a class="text-xs font-medium text-primary hover:text-blue-400" href="/leaderboard">View Leaderboard →</a>
+        </div>
+    </div>
+    <% } %>
+    
+    <!-- Announcement -->
+    <div class="bg-gradient-to-br from-primary/20 to-purple-900/20 rounded-lg border border-primary/20 p-5">
+        <div class="flex items-start justify-between">
+            <h3 class="text-slate-900 dark:text-white font-bold text-sm mb-2">Share Knowledge</h3>
+            <span class="material-symbols-outlined text-primary text-lg">rocket_launch</span>
+        </div>
+        <p class="text-xs text-gray-600 dark:text-gray-300 mb-3">Help your teammates by answering questions and sharing your expertise.</p>
+        <a href="/questions?filter=unanswered" class="block w-full py-1.5 rounded bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-colors text-center">Answer Questions</a>
+    </div>
+</aside>

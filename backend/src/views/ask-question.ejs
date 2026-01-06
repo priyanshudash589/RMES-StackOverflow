@@ -1,0 +1,322 @@
+<%- include('partials/header', { pageTitle: 'Ask a Question' }) %>
+
+<!-- Main Content -->
+<div class="layout-container flex justify-center py-6 px-4 md:px-8 lg:px-20 xl:px-40 grow">
+    <div class="flex flex-col lg:flex-row gap-8 max-w-[1200px] w-full">
+        
+        <!-- Left Column: Form -->
+        <main class="flex-1 flex flex-col gap-6">
+            <!-- Page Heading -->
+            <div class="flex flex-wrap justify-between gap-3 pb-2">
+                <h1 class="text-slate-900 dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">Ask a public question</h1>
+            </div>
+            
+            <form action="/api/questions" method="POST" id="askQuestionForm">
+                <!-- Step 1: Title -->
+                <div class="bg-white dark:bg-[#1b2027] p-6 rounded-xl border border-gray-200 dark:border-[#282f39] shadow-sm mb-6">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-slate-900 dark:text-white text-base font-bold" for="title">Title</label>
+                            <span class="text-gray-500 dark:text-[#9ca8ba] text-xs">Be specific</span>
+                        </div>
+                        <p class="text-gray-500 dark:text-[#9ca8ba] text-sm mb-2">Imagine you're asking a question to another person.</p>
+                        <input 
+                            id="title"
+                            name="title"
+                            required
+                            class="form-input flex w-full resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary border border-gray-300 dark:border-[#3b4554] bg-white dark:bg-[#111418] h-12 placeholder:text-gray-400 dark:placeholder:text-[#9ca8ba] px-4 text-base font-normal leading-normal transition-shadow" 
+                            placeholder="e.g., How do I resolve the CORS error on the staging API gateway?"
+                            oninput="searchSimilarQuestions(this.value)"
+                        />
+                        
+                        <!-- Similar Questions Widget -->
+                        <div id="similarQuestionsWidget" class="mt-4 pt-4 border-t border-gray-200 dark:border-[#282f39] hidden">
+                            <p class="text-primary text-sm font-semibold mb-3 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+                                We found similar questions:
+                            </p>
+                            <div id="similarQuestionsList" class="flex flex-col gap-2">
+                                <!-- Similar questions will be inserted here dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Body (Markdown Editor) -->
+                <div class="bg-white dark:bg-[#1b2027] p-6 rounded-xl border border-gray-200 dark:border-[#282f39] shadow-sm flex flex-col gap-3 mb-6">
+                    <div>
+                        <label class="text-slate-900 dark:text-white text-base font-bold" for="body">Body</label>
+                        <p class="text-gray-500 dark:text-[#9ca8ba] text-sm mb-2">Include all the information someone would need to answer your question.</p>
+                    </div>
+                    <div class="border border-gray-300 dark:border-[#3b4554] rounded-lg overflow-hidden bg-white dark:bg-[#111418] focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-shadow">
+                        <!-- Toolbar -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 px-2 py-2 border-b border-gray-200 dark:border-[#3b4554] bg-gray-50 dark:bg-[#1b2027]">
+                            <div class="flex gap-1">
+                                <button type="button" class="p-1.5 text-gray-500 dark:text-[#9ca8ba] hover:text-slate-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-[#3b4554] rounded transition-colors" title="Bold" onclick="insertMarkdown('**', '**')">
+                                    <span class="material-symbols-outlined text-[20px]">format_bold</span>
+                                </button>
+                                <button type="button" class="p-1.5 text-gray-500 dark:text-[#9ca8ba] hover:text-slate-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-[#3b4554] rounded transition-colors" title="Italic" onclick="insertMarkdown('*', '*')">
+                                    <span class="material-symbols-outlined text-[20px]">format_italic</span>
+                                </button>
+                                <button type="button" class="p-1.5 text-gray-500 dark:text-[#9ca8ba] hover:text-slate-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-[#3b4554] rounded transition-colors" title="Code Block" onclick="insertMarkdown('```\n', '\n```')">
+                                    <span class="material-symbols-outlined text-[20px]">code</span>
+                                </button>
+                                <div class="w-px h-6 bg-gray-200 dark:bg-[#3b4554] mx-1 self-center"></div>
+                                <button type="button" class="p-1.5 text-gray-500 dark:text-[#9ca8ba] hover:text-slate-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-[#3b4554] rounded transition-colors" title="Link" onclick="insertMarkdown('[', '](url)')">
+                                    <span class="material-symbols-outlined text-[20px]">link</span>
+                                </button>
+                                <button type="button" class="p-1.5 text-gray-500 dark:text-[#9ca8ba] hover:text-slate-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-[#3b4554] rounded transition-colors" title="Quote" onclick="insertMarkdown('> ', '')">
+                                    <span class="material-symbols-outlined text-[20px]">format_quote</span>
+                                </button>
+                                <button type="button" class="p-1.5 text-gray-500 dark:text-[#9ca8ba] hover:text-slate-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-[#3b4554] rounded transition-colors" title="List" onclick="insertMarkdown('- ', '')">
+                                    <span class="material-symbols-outlined text-[20px]">format_list_bulleted</span>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Textarea -->
+                        <textarea 
+                            id="body"
+                            name="body"
+                            required
+                            class="w-full h-64 bg-white dark:bg-[#111418] text-slate-900 dark:text-white p-4 focus:outline-none font-mono text-sm leading-relaxed resize-y border-none" 
+                            placeholder="Explain your problem here... You can use Markdown."
+                        ></textarea>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Metadata -->
+                <div class="bg-white dark:bg-[#1b2027] p-6 rounded-xl border border-gray-200 dark:border-[#282f39] shadow-sm mb-6">
+                    <div class="flex flex-col gap-6">
+                        <!-- Tags Input -->
+                        <div class="flex flex-col gap-2">
+                            <label class="text-slate-900 dark:text-white text-base font-bold">Tags</label>
+                            <p class="text-gray-500 dark:text-[#9ca8ba] text-sm mb-2">Add up to 5 tags to describe what your question is about.</p>
+                            <div id="tagsContainer" class="flex flex-wrap items-center gap-2 w-full rounded-lg border border-gray-300 dark:border-[#3b4554] bg-white dark:bg-[#111418] p-2 focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-shadow min-h-[50px]">
+                                <!-- Tag chips will be inserted here -->
+                                <input 
+                                    id="tagInput"
+                                    type="text"
+                                    class="bg-transparent border-none text-slate-900 dark:text-white focus:ring-0 p-1 flex-1 min-w-[120px] text-sm" 
+                                    placeholder="e.g. (react, python, aws)"
+                                    onkeydown="handleTagInput(event)"
+                                />
+                            </div>
+                            <input type="hidden" name="tagIds" id="tagIdsInput" value="">
+                        </div>
+                        
+                        <!-- Department Selector -->
+                        <div class="flex flex-col gap-2">
+                            <label class="text-slate-900 dark:text-white text-base font-bold" for="departmentId">Target Department</label>
+                            <div class="relative">
+                                <select 
+                                    id="departmentId"
+                                    name="departmentId"
+                                    class="w-full appearance-none rounded-lg bg-white dark:bg-[#111418] border border-gray-300 dark:border-[#3b4554] text-slate-900 dark:text-white py-3 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer"
+                                >
+                                    <option value="">Select an engineering vertical...</option>
+                                    <% if (typeof departments !== 'undefined') { %>
+                                        <% departments.forEach(function(dept) { %>
+                                        <option value="<%= dept.id %>"><%= dept.name %></option>
+                                        <% }); %>
+                                    <% } %>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500 dark:text-[#9ca8ba]">
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Bar -->
+                <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-4">
+                    <a href="/questions" class="text-gray-500 dark:text-[#9ca8ba] hover:text-slate-900 dark:hover:text-white text-sm font-medium px-4 py-2 transition-colors">Cancel</a>
+                    <div class="flex gap-3 w-full sm:w-auto">
+                        <button type="submit" class="flex-1 sm:flex-none px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-blue-600 transition-colors shadow-lg shadow-primary/20">
+                            Post Question
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+        
+        <!-- Right Column: Sidebar -->
+        <aside class="w-full lg:w-80 shrink-0 flex flex-col gap-6">
+            <!-- Info Box -->
+            <div class="bg-white dark:bg-[#1b2027] p-5 rounded-xl border border-gray-200 dark:border-[#282f39] sticky top-24">
+                <div class="flex items-center gap-2 mb-4 text-slate-900 dark:text-white">
+                    <span class="material-symbols-outlined text-primary">tips_and_updates</span>
+                    <h3 class="font-bold text-lg">Writing a good question</h3>
+                </div>
+                <div class="text-sm text-gray-500 dark:text-[#9ca8ba] space-y-4">
+                    <p>You're ready to ask a programming-related question and this form will help guide you through the process.</p>
+                    <div class="space-y-2">
+                        <h4 class="text-slate-900 dark:text-white font-medium text-xs uppercase tracking-wider">Steps</h4>
+                        <ul class="list-disc list-inside space-y-1 ml-1">
+                            <li>Summarize your problem in a one-line title.</li>
+                            <li>Describe your problem in more detail.</li>
+                            <li>Describe what you tried and what you expected to happen.</li>
+                            <li>Add "tags" which help surface your question to members of the community.</li>
+                            <li>Review your question and post it to the site.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-100 dark:bg-[#282f39]/50 p-3 rounded-lg border border-gray-200 dark:border-primary/20">
+                        <h4 class="text-slate-900 dark:text-white font-medium text-xs mb-1">Markdown Shortcuts</h4>
+                        <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                            <div>**bold**</div>
+                            <div>*italic*</div>
+                            <div>[link](url)</div>
+                            <div>`code`</div>
+                            <div>&gt; quote</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script>
+// Tags handling
+let selectedTags = [];
+const maxTags = 5;
+
+function addTagChip(tagName) {
+    if (selectedTags.length >= maxTags) return;
+    if (selectedTags.includes(tagName.toLowerCase())) return;
+    
+    selectedTags.push(tagName.toLowerCase());
+    updateTagsUI();
+}
+
+function removeTag(tagName) {
+    selectedTags = selectedTags.filter(t => t !== tagName);
+    updateTagsUI();
+}
+
+function updateTagsUI() {
+    const container = document.getElementById('tagsContainer');
+    const input = document.getElementById('tagInput');
+    const hiddenInput = document.getElementById('tagIdsInput');
+    
+    // Remove existing chips
+    container.querySelectorAll('.tag-chip').forEach(el => el.remove());
+    
+    // Add chips for selected tags
+    selectedTags.forEach(tag => {
+        const chip = document.createElement('div');
+        chip.className = 'tag-chip flex items-center gap-1 bg-primary/20 text-blue-700 dark:text-blue-200 px-2 py-1 rounded text-sm border border-primary/30';
+        chip.innerHTML = `
+            <span>${tag}</span>
+            <button type="button" onclick="removeTag('${tag}')" class="hover:text-blue-900 dark:hover:text-white flex items-center">
+                <span class="material-symbols-outlined text-[16px]">close</span>
+            </button>
+        `;
+        container.insertBefore(chip, input);
+    });
+    
+    hiddenInput.value = selectedTags.join(',');
+}
+
+function handleTagInput(event) {
+    if (event.key === 'Enter' || event.key === ',') {
+        event.preventDefault();
+        const value = event.target.value.trim().replace(',', '');
+        if (value) {
+            addTagChip(value);
+            event.target.value = '';
+        }
+    }
+}
+
+// Similar questions search
+let searchTimeout;
+function searchSimilarQuestions(query) {
+    clearTimeout(searchTimeout);
+    const widget = document.getElementById('similarQuestionsWidget');
+    const list = document.getElementById('similarQuestionsList');
+    
+    if (query.length < 10) {
+        widget.classList.add('hidden');
+        return;
+    }
+    
+    searchTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`/api/questions/similar?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            
+            if (data.data && data.data.length > 0) {
+                widget.classList.remove('hidden');
+                list.innerHTML = data.data.slice(0, 3).map(q => `
+                    <a href="/questions/${q.id}" class="flex items-center gap-4 bg-gray-50 dark:bg-[#111418] p-3 rounded-lg border border-gray-200 dark:border-[#282f39] hover:border-primary/50 cursor-pointer transition-colors group">
+                        <div class="text-gray-400 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-[#282f39] shrink-0 size-8">
+                            <span class="material-symbols-outlined text-[18px]">question_mark</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-slate-900 dark:text-white text-sm font-medium truncate group-hover:text-primary transition-colors">${q.title}</p>
+                        </div>
+                        <div class="shrink-0 text-gray-400 group-hover:text-slate-900 dark:group-hover:text-white">
+                            <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                        </div>
+                    </a>
+                `).join('');
+            } else {
+                widget.classList.add('hidden');
+            }
+        } catch (err) {
+            widget.classList.add('hidden');
+        }
+    }, 500);
+}
+
+// Markdown insertion helper
+function insertMarkdown(before, after) {
+    const textarea = document.getElementById('body');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selectedText = text.substring(start, end);
+    
+    textarea.value = text.substring(0, start) + before + selectedText + after + text.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + before.length, start + before.length + selectedText.length);
+}
+
+// Form submission
+document.getElementById('askQuestionForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        title: document.getElementById('title').value,
+        body: document.getElementById('body').value,
+        departmentId: document.getElementById('departmentId').value || undefined,
+        tagIds: selectedTags
+    };
+    
+    try {
+        const response = await fetch('/api/questions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-User-Id': 'demo-user-id',
+                'X-User-Email': 'demo@example.com',
+                'X-User-Name': 'Demo User'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            window.location.href = '/questions/' + data.id;
+        } else {
+            const error = await response.json();
+            alert('Error: ' + (error.message || 'Failed to post question'));
+        }
+    } catch (err) {
+        alert('Error posting question. Please try again.');
+    }
+});
+</script>
+
+<%- include('partials/footer') %>

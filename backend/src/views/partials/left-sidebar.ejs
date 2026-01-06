@@ -1,0 +1,43 @@
+<!-- Left Sidebar: Navigation & Filters -->
+<aside class="hidden lg:block lg:col-span-2 xl:col-span-2 flex flex-col gap-8 sticky top-24 h-fit">
+    <!-- Navigation -->
+    <div class="flex flex-col gap-2">
+        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider px-3 mb-1">Menu</h3>
+        <a class="flex items-center gap-3 px-3 py-2 rounded-lg <%= typeof activePage !== 'undefined' && activePage === 'home' ? 'bg-primary/10 text-primary font-medium border-l-4 border-primary' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#282f39] transition-colors border-l-4 border-transparent' %>" href="/questions">
+            <span class="material-symbols-outlined text-[20px]">home</span>
+            <span class="text-sm">Home</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#282f39] transition-colors border-l-4 border-transparent" href="/questions?filter=public">
+            <span class="material-symbols-outlined text-[20px]">public</span>
+            <span class="text-sm">Public</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#282f39] transition-colors border-l-4 border-transparent" href="/questions?filter=saved">
+            <span class="material-symbols-outlined text-[20px]">star</span>
+            <span class="text-sm">Saved</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#282f39] transition-colors border-l-4 border-transparent" href="/tags">
+            <span class="material-symbols-outlined text-[20px] fill">loyalty</span>
+            <span class="text-sm">Tags</span>
+        </a>
+    </div>
+    
+    <!-- Departments Filter -->
+    <% if (typeof departments !== 'undefined' && departments.length > 0) { %>
+    <div class="flex flex-col gap-3">
+        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider px-3">Filter by Team</h3>
+        <div class="px-3 flex flex-col gap-2">
+            <% departments.forEach(function(dept) { %>
+            <label class="flex items-center gap-3 cursor-pointer group">
+                <input <%= typeof selectedDepartment !== 'undefined' && selectedDepartment === dept.id ? 'checked' : '' %> 
+                       name="departmentId" 
+                       value="<%= dept.id %>" 
+                       class="h-4 w-4 rounded border-gray-300 dark:border-[#3b4554] bg-white dark:bg-transparent text-primary focus:ring-0 focus:ring-offset-0 transition-colors" 
+                       type="checkbox"
+                       onchange="window.location.href='/questions?departmentId=' + this.value"/>
+                <span class="text-sm text-slate-700 dark:text-gray-300 group-hover:text-primary transition-colors"><%= dept.name %></span>
+            </label>
+            <% }); %>
+        </div>
+    </div>
+    <% } %>
+</aside>

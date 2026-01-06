@@ -1,0 +1,76 @@
+<%- include('partials/header', { pageTitle: 'Question Feed', search: typeof search !== 'undefined' ? search : '' }) %>
+
+<!-- Main Layout -->
+<div class="flex-1 w-full max-w-[1600px] mx-auto px-4 lg:px-10 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
+        
+        <%- include('partials/left-sidebar', { activePage: 'home', departments: departments }) %>
+        
+        <!-- Center Feed -->
+        <main class="col-span-1 lg:col-span-7 xl:col-span-7 flex flex-col min-h-[800px]">
+            <!-- Feed Header / Tabs -->
+            <div class="flex items-center justify-between border-b border-gray-200 dark:border-[#282f39] mb-4">
+                <h1 class="text-2xl font-bold text-slate-900 dark:text-white hidden sm:block">All Questions</h1>
+                <div class="flex gap-1 sm:gap-6 overflow-x-auto">
+                    <a class="flex items-center justify-center border-b-2 <%= !sortBy || sortBy === 'newest' ? 'border-primary text-slate-900 dark:text-white' : 'border-transparent text-gray-500 dark:text-[#9ca8ba] hover:text-slate-900 dark:hover:text-white' %> pb-3 px-2 sm:px-0 transition-colors" href="?sort=newest<%= search ? '&search=' + search : '' %>">
+                        <span class="text-sm <%= !sortBy || sortBy === 'newest' ? 'font-bold' : 'font-medium' %> whitespace-nowrap">Newest</span>
+                    </a>
+                    <a class="flex items-center justify-center border-b-2 <%= sortBy === 'active' ? 'border-primary text-slate-900 dark:text-white' : 'border-transparent text-gray-500 dark:text-[#9ca8ba] hover:text-slate-900 dark:hover:text-white' %> pb-3 px-2 sm:px-0 transition-colors" href="?sort=active<%= search ? '&search=' + search : '' %>">
+                        <span class="text-sm <%= sortBy === 'active' ? 'font-bold' : 'font-medium' %> whitespace-nowrap">Active</span>
+                    </a>
+                    <a class="flex items-center justify-center border-b-2 <%= sortBy === 'unanswered' ? 'border-primary text-slate-900 dark:text-white' : 'border-transparent text-gray-500 dark:text-[#9ca8ba] hover:text-slate-900 dark:hover:text-white' %> pb-3 px-2 sm:px-0 transition-colors" href="?sort=unanswered<%= search ? '&search=' + search : '' %>">
+                        <span class="text-sm <%= sortBy === 'unanswered' ? 'font-bold' : 'font-medium' %> whitespace-nowrap">Unanswered</span>
+                    </a>
+                    <a class="flex items-center justify-center border-b-2 <%= sortBy === 'votes' ? 'border-primary text-slate-900 dark:text-white' : 'border-transparent text-gray-500 dark:text-[#9ca8ba] hover:text-slate-900 dark:hover:text-white' %> pb-3 px-2 sm:px-0 transition-colors" href="?sort=votes<%= search ? '&search=' + search : '' %>">
+                        <span class="text-sm <%= sortBy === 'votes' ? 'font-bold' : 'font-medium' %> whitespace-nowrap">Top Voted</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Questions List -->
+            <div class="flex flex-col gap-4">
+                <% if (questions && questions.length > 0) { %>
+                    <% questions.forEach(function(question) { %>
+                        <%- include('partials/question-card', { question: question }) %>
+                    <% }); %>
+                <% } else { %>
+                    <!-- Empty State -->
+                    <div class="flex flex-col items-center justify-center py-16 px-4">
+                        <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">help_outline</span>
+                        <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">No questions found</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-center mb-6">Be the first to ask a question and help build the knowledge base!</p>
+                        <a href="/questions/ask" class="inline-flex items-center px-4 py-2 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-[20px] mr-2">add</span>
+                            Ask Question
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+            
+            <!-- Pagination -->
+            <% if (pagination && pagination.totalPages > 1) { %>
+            <div class="flex items-center justify-center gap-2 mt-8">
+                <% if (pagination.page > 1) { %>
+                <a href="?page=<%= pagination.page - 1 %><%= search ? '&search=' + search : '' %><%= sortBy ? '&sort=' + sortBy : '' %>" class="px-3 py-2 rounded-lg bg-gray-100 dark:bg-[#282f39] text-gray-700 dark:text-gray-300 hover:bg-primary/20 transition-colors text-sm font-medium">
+                    Previous
+                </a>
+                <% } %>
+                
+                <span class="px-4 py-2 text-sm text-gray-500">
+                    Page <%= pagination.page %> of <%= pagination.totalPages %>
+                </span>
+                
+                <% if (pagination.page < pagination.totalPages) { %>
+                <a href="?page=<%= pagination.page + 1 %><%= search ? '&search=' + search : '' %><%= sortBy ? '&sort=' + sortBy : '' %>" class="px-3 py-2 rounded-lg bg-gray-100 dark:bg-[#282f39] text-gray-700 dark:text-gray-300 hover:bg-primary/20 transition-colors text-sm font-medium">
+                    Next
+                </a>
+                <% } %>
+            </div>
+            <% } %>
+        </main>
+        
+        <%- include('partials/right-sidebar', { trendingQuestions: trendingQuestions, topContributors: topContributors }) %>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

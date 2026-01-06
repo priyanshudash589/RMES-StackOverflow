@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title><%= typeof pageTitle !== 'undefined' ? pageTitle : 'DevEngine' %> - DevEngine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0d6cf2",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#101722",
+                        "card-dark": "#1e293b",
+                        "card-border": "#282f39",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #374151; border-radius: 20px; }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased min-h-screen flex flex-col overflow-y-scroll custom-scrollbar">
+
+<!-- Top Navigation -->
+<header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-[#282f39] bg-white dark:bg-[#111418] px-4 lg:px-10 py-3 shadow-sm dark:shadow-none">
+    <div class="flex items-center gap-4 lg:gap-8 w-full max-w-[1600px] mx-auto">
+        <a href="/" class="flex items-center gap-3 text-slate-900 dark:text-white cursor-pointer min-w-fit">
+            <div class="size-8 text-primary">
+                <svg class="h-full w-full" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" fill="currentColor"></path>
+                </svg>
+            </div>
+            <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] hidden sm:block">DevEngine</h2>
+        </a>
+        
+        <!-- Global Search -->
+        <form action="/questions" method="GET" class="hidden md:flex flex-col min-w-40 h-10 max-w-[600px] flex-1">
+            <div class="flex w-full flex-1 items-stretch rounded-lg h-full group">
+                <div class="text-gray-400 flex border-none bg-gray-100 dark:bg-[#282f39] items-center justify-center pl-4 rounded-l-lg border-r-0 group-focus-within:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">search</span>
+                </div>
+                <input name="search" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-gray-100 dark:bg-[#282f39] focus:border-none h-full placeholder:text-gray-400 dark:placeholder:text-[#9ca8ba] px-4 pl-2 text-sm font-normal leading-normal transition-all" placeholder="Search questions, tags, or users (Cmd+K)..." value="<%= typeof search !== 'undefined' ? search : '' %>"/>
+            </div>
+        </form>
+        
+        <div class="flex flex-1 justify-end items-center gap-4 lg:gap-8">
+            <div class="hidden lg:flex items-center gap-6">
+                <a class="text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-white text-sm font-medium leading-normal transition-colors" href="/questions">Questions</a>
+                <a class="text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-white text-sm font-medium leading-normal transition-colors" href="/tags">Tags</a>
+                <a class="text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-white text-sm font-medium leading-normal transition-colors" href="/leaderboard">Leaderboard</a>
+            </div>
+            <a href="/questions/ask" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-primary hover:bg-primary/90 transition-colors text-white text-sm font-bold leading-normal tracking-[0.015em] shadow-lg shadow-primary/20">
+                <span class="truncate">Ask Question</span>
+            </a>
+            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 ring-2 ring-gray-200 dark:ring-gray-700 cursor-pointer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDwzDDUOZjZbqS4SdJgRuhCnKCh1-rJO-Yj4Q6-gbJYY3yKzCzq256R6PzKBBU2d21HCVlerSdltPb4Wmcssb4mLTijUkZ1Uh4aO-pqngpUEdcYPyop4sLuK1E1ak2TnA758IDkRCy3M-N90eN4v6NXhn6_ajTulf4yNkj6epqdyKrdxrbkcASINdEXT9WVMsZE3v5cTgZMX3HXJ-8rIdJOxwj4HtLmmNz-j9pzZknTIZTNHxn-_V5BWXN01ByWklPFrmvXeimJlTad");'></div>
+        </div>
+    </div>
+</header>
